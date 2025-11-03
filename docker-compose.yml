@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend 
+      dockerfile: Dockerfile
+    container_name: nestjs-ecommerce-app
+    ports:
+      - "3000:3000"
+    environment:
+
+      RENDER_DATABASE_URL: ${RENDER_DATABASE_URL} 
+      
+      NODE_ENV: production
+      JWT_SECRET: your_jwt_secret_key
+    
