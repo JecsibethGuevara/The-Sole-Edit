@@ -1,17 +1,39 @@
-version: '3.8'
-
 services:
-  backend:
+  postgres:
+    image: postgres:15-alpine
+    container_name: soleditdb
+    environment:
+      POSTGRES_DB: soleditdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
     build: 
-      context: ./backend 
+      context: ./
       dockerfile: Dockerfile
-    container_name: nestjs-ecommerce-app
+    container_name: ecommerce-api
     ports:
       - "3000:3000"
     environment:
-
-      RENDER_DATABASE_URL: ${RENDER_DATABASE_URL} 
-      
-      NODE_ENV: production
-      JWT_SECRET: your_jwt_secret_key
-    
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/soleditdb
+      - JWT_SECRET=a-super-secret-key-i-havent-added-yet
+      - NODE_ENV=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+volumes:
+  postgres_data:
