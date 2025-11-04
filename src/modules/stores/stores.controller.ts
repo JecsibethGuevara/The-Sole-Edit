@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Request, UseGua
 import { StoresService } from './stores.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
-import type { AuthenticatedRequest } from '../auth/interfaces/authenticatedRequest.interface';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 
 @Controller('stores')
@@ -14,7 +13,6 @@ export class StoresController {
   create(
     @Body() createStoreDto: CreateStoreDto,
     @Request() req) {
-    console.log(req.user.userId)
     return this.storesService.createStore(createStoreDto, req.user.userId);
   }
 

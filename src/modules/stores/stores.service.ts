@@ -26,7 +26,6 @@ export class StoresService {
     })
 
     await this.storeRepository.save(store)
-
     return store
   }
 
@@ -55,8 +54,8 @@ export class StoresService {
     }
   }
 
-  findOne(id: number) {
-    const store = this.storeRepository.findOne({
+  async findOne(id: number) {
+    const store = await this.storeRepository.findOne({
       where: { id }
     })
 
