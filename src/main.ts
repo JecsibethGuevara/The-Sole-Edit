@@ -2,16 +2,26 @@ import './common/polyfill';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { loadEnv } from './config/envLoader'
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
 
 loadEnv();
 
 // Polyfill for crypto
 import * as crypto from 'crypto';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 (global as any).crypto = crypto;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalFilters(
+    new HttpExceptionFilter());
+
+  app.useGlobalInterceptors(
+    new TransformInterceptor
+  )
 
   const config = new DocumentBuilder()
     .setTitle('The Sole Edit')
