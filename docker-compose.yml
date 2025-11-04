@@ -22,11 +22,12 @@ services:
       context: ./
       dockerfile: Dockerfile
     container_name: ecommerce-api
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/soleditdb
-      - JWT_SECRET=a-super-secret-key-i-havent-added-yet
       - NODE_ENV=development
     depends_on:
       postgres:
