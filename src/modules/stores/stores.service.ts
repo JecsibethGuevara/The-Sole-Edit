@@ -122,7 +122,5 @@ export class StoresService {
 
     const deletedStore = await this.storeRepository.findOne({ where: { id } })
     return deletedStore;
-
-
   }
 }

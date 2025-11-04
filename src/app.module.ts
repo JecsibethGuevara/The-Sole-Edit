@@ -10,6 +10,8 @@ import { JwtConfigService } from "./modules/auth/strategies/jwt.config";
 import { StoresModule } from "./modules/stores/stores.module";
 import { JwtAuthGuard } from "./common/guards/jwt.guard";
 import { Store } from "./modules/stores/entities/store.entity";
+import { Product } from "./modules/products/entities/product.entity";
+import { ProductsModule } from "./modules/products/products.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,7 +23,7 @@ import { Store } from "./modules/stores/entities/store.entity";
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
-        entities: [User, Store],
+        entities: [User, Store, Product],
         synchronize: true,
         logging: true,
       }),
@@ -29,6 +31,7 @@ import { Store } from "./modules/stores/entities/store.entity";
     }),
     AuthModule,
     StoresModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtAuthGuard],
