@@ -19,4 +19,7 @@ export class User {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @Column()
+    is_active: Boolean;
 }

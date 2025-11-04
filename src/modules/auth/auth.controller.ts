@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/log-in.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import type { AuthenticatedRequest } from './interfaces/authenticatedRequest.interface';
 
 
 @Controller('auth')
@@ -20,8 +22,13 @@ export class AuthController {
     return this.authService.login(loginDto)
   }
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateUserDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @UseGuards(JwtAuthGuard)
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateAuthDto: UpdateUserDto,
+    @Req() req: any
+  ) {
+    return this.authService.update(+id, updateAuthDto, req.user.userId);
   }
 
   @Delete(':id')

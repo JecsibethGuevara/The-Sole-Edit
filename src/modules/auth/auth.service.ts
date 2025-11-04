@@ -77,13 +77,57 @@ export class AuthService {
   }
 
 
-  update(id: number, updateAuthDto: UpdateUserDto) {
-    return `This action updates a #${id} auth`;
+  async update(id: number, updateAuthDto: UpdateUserDto, requestingUserId) {
+    const { email, name, password } = updateAuthDto
+    console.log(id, requestingUserId)
+
+    if (id !== requestingUserId) {
+      throw new UnauthorizedException('You have no authorization to change this user')
+    }
+
+    const user = await this.userRepository.findOne({ where: { id } })
+    if (!user) {
+      throw new BadRequestException('User not found')
+    }
+
+    if (updateAuthDto.email && updateAuthDto.email !== user.email) {
+      const isUsedEmail = await this.userRepository.findOne({ where: { email: updateAuthDto.email } })
+
+      if (isUsedEmail) {
+        throw new BadRequestException('Email is already in use')
+      }
+    }
+
+
+    if (updateAuthDto.password) {
+      const saltRounds = 12
+      updateAuthDto.password = await bcrypt.hash(updateAuthDto.password, saltRounds)
+    }
+
+    await this.userRepository.update(id, {
+      ...updateAuthDto,
+      ...(updateAuthDto.password && { password_hash: updateAuthDto.password })
+    })
+
+    const updatedUser = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'email', 'updatedAt']
+    })
+    return updatedUser
   }
 
-  // remember: implementar soft deletes 
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async remove(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id }
+    })
+    if (!user) {
+      throw new BadRequestException('User does not exist')
+    }
+    await this.userRepository.update(id, {
+      is_active: false
+    })
+    const deletedUser = await this.userRepository.findOne({ where: { id }, select: ['id', 'name', 'email', 'updatedAt'] })
+    return deletedUser;
   }
 }
