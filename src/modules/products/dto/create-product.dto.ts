@@ -5,6 +5,10 @@ export class CreateProductDto {
     @IsNotEmpty()
     name: string
 
+    @IsInt()
+    @IsNotEmpty()
+    store_id: number;
+
     @IsString()
     @IsNotEmpty()
     description: string;

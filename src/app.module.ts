@@ -12,6 +12,10 @@ import { JwtAuthGuard } from "./common/guards/jwt.guard";
 import { Store } from "./modules/stores/entities/store.entity";
 import { Product } from "./modules/products/entities/product.entity";
 import { ProductsModule } from "./modules/products/products.module";
+import { StoreProduct } from "./modules/store-products/entities/store-product.entity";
+import { StoreProductsModule } from "./modules/store-products/store-products.module";
+import { DataSource } from "typeorm";
+import { ProductSubscriber } from "./common/subscribers/product.subscriber";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +27,7 @@ import { ProductsModule } from "./modules/products/products.module";
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
-        entities: [User, Store, Product],
+        entities: [User, Store, Product, StoreProduct],
         synchronize: true,
         logging: true,
       }),
@@ -32,9 +36,17 @@ import { ProductsModule } from "./modules/products/products.module";
     AuthModule,
     StoresModule,
     ProductsModule,
+    StoreProductsModule
   ],
   controllers: [AppController],
-  providers: [AppService, JwtAuthGuard],
+  providers: [AppService, JwtAuthGuard, {
+    provide: 'INIT_SUBSCRIBERS',
+    useFactory: (dataSource: DataSource) => {
+      new ProductSubscriber(dataSource)
+      return true;
+    },
+    inject: [DataSource]
+  }],
 })
 export class AppModule { }
 

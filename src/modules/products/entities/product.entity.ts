@@ -1,9 +1,13 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { StoreProduct } from "src/modules/store-products/entities/store-product.entity";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('products')
 export class Product {
     @PrimaryGeneratedColumn()
     id: number;
+
+    @Column()
+    store_id: number;
 
     @Column()
     name: string
@@ -32,4 +36,7 @@ export class Product {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @OneToMany(() => StoreProduct, storeProduct => storeProduct.product)
+    storeProducts: StoreProduct[];
 }

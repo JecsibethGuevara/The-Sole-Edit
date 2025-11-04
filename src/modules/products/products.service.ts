@@ -15,6 +15,7 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto, userId: number) {
     const producto = this.productRepository.create({
       ...createProductDto,
+      store_id: +createProductDto.store_id,
       is_active: true,
       created_by: userId
     })

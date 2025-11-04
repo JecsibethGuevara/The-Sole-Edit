@@ -1,0 +1,22 @@
+import { IsBoolean, IsInt, IsNotEmpty, IsString } from "class-validator";
+import { Product } from "src/modules/products/entities/product.entity";
+import { Store } from "src/modules/stores/entities/store.entity";
+
+export class CreateStoreProductDto {
+    @IsNotEmpty()
+    store_id: Store
+    @IsNotEmpty()
+    product_id: Product
+    @IsInt()
+    @IsNotEmpty()
+    price: number;
+    @IsInt()
+    @IsNotEmpty()
+    stock: number;
+    @IsBoolean()
+    @IsNotEmpty()
+    is_available: boolean;
+    @IsInt()
+    @IsNotEmpty()
+    created_by: number;
+}
