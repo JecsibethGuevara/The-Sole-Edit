@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { SignUpDto } from './dto/sign-up.dto';
 import { LoginDto } from './dto/log-in.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,7 +28,7 @@ export class AuthService {
 
     // remember:  implement filters and interceptors
     if (existingUser) {
-      throw new BadRequestException('This email is already in used')
+      throw new ConflictException('This email is already in used')
     }
 
     const saltRounds = 12;
@@ -56,7 +56,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { email } })
 
     if (!user) {
-      throw new BadRequestException('This User does not exist')
+      throw new NotFoundException('This User does not exist')
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
@@ -87,14 +87,14 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({ where: { id } })
     if (!user) {
-      throw new BadRequestException('User not found')
+      throw new NotFoundException('User not found')
     }
 
     if (updateAuthDto.email && updateAuthDto.email !== user.email) {
       const isUsedEmail = await this.userRepository.findOne({ where: { email: updateAuthDto.email } })
 
       if (isUsedEmail) {
-        throw new BadRequestException('Email is already in use')
+        throw new ConflictException('Email is already in use')
       }
     }
 
@@ -122,7 +122,7 @@ export class AuthService {
       where: { id }
     })
     if (!user) {
-      throw new BadRequestException('User does not exist')
+      throw new NotFoundException('User does not exist')
     }
     await this.userRepository.update(id, {
       is_active: false

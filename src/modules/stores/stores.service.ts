@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,7 +19,7 @@ export class StoresService {
     const existingStore = await this.storeRepository.findOne({ where: { email: createStoreDto.email } })
 
     if (existingStore) {
-      throw new BadRequestException('This email is already in use')
+      throw new ConflictException('This email is already in use')
     }
 
     const store = this.storeRepository.create({
@@ -60,7 +60,7 @@ export class StoresService {
     })
 
     if (!store) {
-      throw new BadRequestException(' Store does not exist')
+      throw new NotFoundException(' Store does not exist')
     }
 
     return store;
@@ -73,7 +73,7 @@ export class StoresService {
     })
 
     if (!store) {
-      throw new BadRequestException(' Store does not exist')
+      throw new NotFoundException(' Store does not exist')
     }
 
     if (updateStoreDto.email && updateStoreDto.email !== store.email) {
@@ -82,7 +82,7 @@ export class StoresService {
       })
 
       if (isEmailUsed) {
-        throw new BadRequestException()
+        throw new ConflictException('This email is already in use')
       }
     }
 
@@ -92,7 +92,7 @@ export class StoresService {
       })
 
       if (isNameUsed) {
-        throw new BadRequestException()
+        throw new ConflictException('This name is already in use')
       }
     }
 
@@ -112,7 +112,7 @@ export class StoresService {
     const store = await this.storeRepository.findOne({ where: { id } })
 
     if (!store) {
-      throw new BadRequestException()
+      throw new NotFoundException(' Store does not exist')
     }
 
     await this.storeRepository.update(id, {

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateStoreProductDto } from './dto/update-store-product.dto';
 import { CreateStoreProductDto } from './dto/create-store-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,7 +29,7 @@ export class StoreProductsService {
 
     if (existingRelationShip) {
       console.log(existingRelationShip)
-      throw new BadRequestException()
+      throw new ConflictException()
     }
 
     const storeProduct = this.storeProdsRepository.create({
@@ -72,7 +72,7 @@ export class StoreProductsService {
     })
 
     if (!storeProduct) {
-      throw new BadRequestException()
+      throw new NotFoundException()
     }
 
     if (updateStoreProductDto.store_id || updateStoreProductDto.product_id) {
@@ -92,7 +92,7 @@ export class StoreProductsService {
     const store = await this.storeProdsRepository.findOne({ where: { id } })
 
     if (!store) {
-      throw new BadRequestException()
+      throw new NotFoundException()
     }
 
     await this.storeProdsRepository.update(id, {
