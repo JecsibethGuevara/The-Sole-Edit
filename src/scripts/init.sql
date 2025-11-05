@@ -56,3 +56,7 @@ CREATE INDEX idx_products_category ON products(category);
 
 CREATE INDEX idx_stores_name ON stores(name);
 CREATE INDEX idx_stores_deleted ON stores(deleted_at) WHERE deleted_at IS NULL;
+
+ALTER TABLE store_products ALTER COLUMN is_available SET DEFAULT true;
+ALTER TABLE stores ALTER COLUMN is_active SET DEFAULT true;
+

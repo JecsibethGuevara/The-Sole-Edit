@@ -3,6 +3,8 @@ import { StoresService } from './stores.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { Pagination } from 'src/common/decorators/pagination.decorator';
+import { PaginationDto } from 'src/common/services/dtos/pagination.dto';
 
 @Controller('stores')
 @UseGuards(JwtAuthGuard)
@@ -18,9 +20,9 @@ export class StoresController {
 
   @Get()
   findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number
+    @Pagination() pagination: PaginationDto
   ) {
-    return this.storesService.findAll(page);
+    return this.storesService.findAll(pagination);
   }
 
   @Get(':id')

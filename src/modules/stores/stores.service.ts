@@ -4,12 +4,15 @@ import { UpdateStoreDto } from './dto/update-store.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Store } from './entities/store.entity';
 import { Repository } from 'typeorm';
+import { PaginationDto } from 'src/common/services/dtos/pagination.dto';
+import { PaginationService } from 'src/common/services/pagination.service';
 
 @Injectable()
 export class StoresService {
   constructor(
     @InjectRepository(Store)
     private storeRepository: Repository<Store>,
+    private paginationService: PaginationService,
   ) { }
 
   async createStore(createStoreDto: CreateStoreDto, userId: number) {
@@ -31,14 +34,10 @@ export class StoresService {
 
   //implement pagination and search
 
-  async findAll(page?: number, limit: number = 25) {
-    console.log(page)
-    const pageReq = page ? page : 1
-    const skip = (pageReq - 1) * limit
-    console.log(skip)
-
+  async findAll(pagination: PaginationDto) {
+    const skip = (pagination.page || 1 - 1) * (pagination.limit || 25)
     const [stores, total] = await this.storeRepository.findAndCount({
-      take: limit,
+      take: pagination.limit,
       skip: skip,
       //remember: if time allows implement filters
       order: {
@@ -46,12 +45,13 @@ export class StoresService {
       }
     })
 
-    return {
-      data: stores,
-      total: total,
-      page: page,
-      limit: limit
-    }
+    return this.paginationService.buildPaginatedResponse(
+      stores,
+      total,
+      pagination.page || 1,
+      pagination.limit || 25,
+      'stores',
+    )
   }
 
   async findOne(id: number) {

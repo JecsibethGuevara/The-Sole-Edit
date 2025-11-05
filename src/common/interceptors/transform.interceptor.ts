@@ -5,7 +5,6 @@ import { In, TreeLevelColumn } from 'typeorm';
 
 export interface Response<T> {
     success: boolean;
-    data: T;
     message: string;
     timestamp: Date;
 }
@@ -15,7 +14,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
         return next.handle().pipe(
             map(data => ({
                 success: true,
-                data,
+                ...data,
                 message: 'Request successful',
                 timestamp: new Date(),
             }))

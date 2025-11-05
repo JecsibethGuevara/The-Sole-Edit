@@ -1,4 +1,4 @@
-import { Controller, Request, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Request, Get, Post, Body, Patch, Param, Delete, UseGuards, DefaultValuePipe, ParseIntPipe, Query } from '@nestjs/common';
 import { StoreProductsService } from './store-products.service';
 import { CreateStoreProductDto } from './dto/create-store-product.dto';
 import { UpdateStoreProductDto } from './dto/update-store-product.dto';
@@ -10,20 +10,18 @@ export class StoreProductsController {
   constructor(private readonly storeProductsService: StoreProductsService) { }
 
   @Post()
-  create(@Body() createStoreProductDto: CreateStoreProductDto,
-    @Request() req) {
-    return this.storeProductsService.create(createStoreProductDto, req.user.userId);
+  create(@Body() createStoreProductDto: CreateStoreProductDto) {
+    return this.storeProductsService.create(createStoreProductDto);
   }
 
   @Get()
-  findAll() {
-    return this.storeProductsService.findAll();
+  findAll(
+    @Param('storeId') storeId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number
+  ) {
+    return this.storeProductsService.findAll(storeId,);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.storeProductsService.findOne(+id);
-  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStoreProductDto: UpdateStoreProductDto) {

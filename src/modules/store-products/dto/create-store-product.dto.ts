@@ -4,9 +4,9 @@ import { Store } from "src/modules/stores/entities/store.entity";
 
 export class CreateStoreProductDto {
     @IsNotEmpty()
-    store_id: Store
+    store_id: number
     @IsNotEmpty()
-    product_id: Product
+    product_id: number
     @IsInt()
     @IsNotEmpty()
     price: number;
