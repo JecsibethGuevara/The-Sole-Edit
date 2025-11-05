@@ -4,9 +4,8 @@ import { CreateStoreProductDto } from './dto/create-store-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StoreProduct } from './entities/store-product.entity';
 import { Repository } from 'typeorm';
-import { PaginationDto } from 'src/common/services/dtos/pagination.dto';
-import { PaginationService } from 'src/common/services/pagination.service';
-import { ProductsModule } from '../products/products.module';
+import { PaginationDto } from 'src/common/services/pagination/dtos/pagination.dto';
+import { PaginationService } from 'src/common/services/pagination/pagination.service';
 
 @Injectable()
 export class StoreProductsService {
@@ -32,12 +31,14 @@ export class StoreProductsService {
       throw new ConflictException()
     }
 
+    const isAvailable = createStoreProductDto.stock > 0
+
     const storeProduct = this.storeProdsRepository.create({
       store: { id: createStoreProductDto.store_id },
       product: { id: createStoreProductDto.product_id },
       price: createStoreProductDto.price,
       stock: createStoreProductDto.stock,
-      is_available: createStoreProductDto.is_available,
+      is_available: isAvailable,
     })
 
 
@@ -46,20 +47,30 @@ export class StoreProductsService {
   }
 
   async findAll(storeId: number, pagination: PaginationDto) {
-    const skip = (pagination.page || 1 - 1) * (pagination.limit || 25)
-    const [products, total] = await this.storeProdsRepository.findAndCount({
-      take: pagination.limit,
-      skip: skip,
-      order: {
-        createdAt: 'DESC'
-      }
-    })
+    const page = pagination.page || 1
+    const limit = pagination.limit || 25
+    const skip = (page - 1) * limit
+    const query = this.storeProdsRepository.createQueryBuilder('storeProduct');
+    query.innerJoinAndSelect('storeProduct.product', 'product');
+    query.where('storeProduct.store.id = :storeId', { storeId });
+
+    if (pagination.category) {
+      query.andWhere('LOWER(product.category) LIKE :category', {
+        category: `%${pagination.category.toLowerCase()}%`
+      });
+    }
+
+    query.orderBy('storeProduct.createdAt', 'DESC');
+    query.skip(skip);
+    query.take(limit);
+
+    const [products, total] = await query.getManyAndCount();
 
     return this.paginationService.buildPaginatedResponse(
       products,
       total,
-      pagination.page || 1,
-      pagination.page || 25,
+      page,
+      limit,
       `store-products/${storeId}/products`
     )
   }
@@ -79,8 +90,14 @@ export class StoreProductsService {
       throw new BadRequestException
     }
 
+    const updatePayload = { ...updateStoreProductDto }
+
+    if (updateStoreProductDto.stock !== undefined) {
+      updatePayload.is_available = updateStoreProductDto.stock > 0;
+    }
+
     await this.storeProdsRepository.update(id, {
-      ...updateStoreProductDto
+      ...updatePayload
     })
 
     const updatedStoreProducts = await this.storeProdsRepository.findOne({ where: { id } })

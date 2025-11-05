@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PaginatedResponse, PaginationMeta } from "../interfaces/pagination.interface";
+import { PaginatedResponse, PaginationMeta } from "./interfaces/pagination.interface";
 
 @Injectable()
 export class PaginationService {
@@ -7,7 +7,7 @@ export class PaginationService {
         total: number,
         page: number,
         limit: number,
-        route: string
+        route: string,
     ): PaginationMeta {
         const totalPages = Math.ceil(total / limit)
         const hasNext = page < totalPages

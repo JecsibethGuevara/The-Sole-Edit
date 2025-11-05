@@ -4,7 +4,7 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { Pagination } from 'src/common/decorators/pagination.decorator';
-import { PaginationDto } from 'src/common/services/dtos/pagination.dto';
+import { PaginationDto } from 'src/common/services/pagination/dtos/pagination.dto';
 
 @Controller('stores')
 @UseGuards(JwtAuthGuard)

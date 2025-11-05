@@ -3,9 +3,9 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Store } from './entities/store.entity';
-import { Repository } from 'typeorm';
-import { PaginationDto } from 'src/common/services/dtos/pagination.dto';
-import { PaginationService } from 'src/common/services/pagination.service';
+import { Like, Repository } from 'typeorm';
+import { PaginationDto } from 'src/common/services/pagination/dtos/pagination.dto';
+import { PaginationService } from 'src/common/services/pagination/pagination.service';
 
 @Injectable()
 export class StoresService {
@@ -36,14 +36,16 @@ export class StoresService {
 
   async findAll(pagination: PaginationDto) {
     const skip = (pagination.page || 1 - 1) * (pagination.limit || 25)
-    const [stores, total] = await this.storeRepository.findAndCount({
-      take: pagination.limit,
-      skip: skip,
-      //remember: if time allows implement filters
-      order: {
-        name: 'ASC'
-      }
-    })
+    const query = this.storeRepository.createQueryBuilder('store');
+    query.skip(skip).take(pagination.limit)
+    query.orderBy('store.name', 'ASC')
+
+    if (pagination.search) {
+      const searchTerm = `%${pagination.search.toLowerCase()}%`;
+      query.where('LOWER(store.name) LIKE :search', { search: searchTerm });
+    }
+
+    const [stores, total] = await query.getManyAndCount();
 
     return this.paginationService.buildPaginatedResponse(
       stores,

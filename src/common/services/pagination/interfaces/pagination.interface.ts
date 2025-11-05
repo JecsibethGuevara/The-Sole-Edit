@@ -6,6 +6,7 @@ export interface PaginationMeta {
     hasPrev: boolean;
     nextPageUrl: string;
     prevPageUrl: string;
+    search?: string;
 }
 
 export interface PaginatedResponse<T> {

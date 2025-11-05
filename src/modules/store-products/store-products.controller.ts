@@ -3,8 +3,10 @@ import { StoreProductsService } from './store-products.service';
 import { CreateStoreProductDto } from './dto/create-store-product.dto';
 import { UpdateStoreProductDto } from './dto/update-store-product.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { Pagination } from 'src/common/decorators/pagination.decorator';
+import { PaginationDto } from 'src/common/services/pagination/dtos/pagination.dto';
 
-@Controller('store-products')
+@Controller('stores')
 @UseGuards(JwtAuthGuard)
 export class StoreProductsController {
   constructor(private readonly storeProductsService: StoreProductsService) { }
@@ -14,12 +16,12 @@ export class StoreProductsController {
     return this.storeProductsService.create(createStoreProductDto);
   }
 
-  @Get()
+  @Get(':id/products')
   findAll(
-    @Param('storeId') storeId: number,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number
+    @Param('id') storeId: number,
+    @Pagination() pagination: PaginationDto
   ) {
-    return this.storeProductsService.findAll(storeId,);
+    return this.storeProductsService.findAll(storeId, pagination);
   }
 
 

@@ -11,6 +11,7 @@ loadEnv();
 import * as crypto from 'crypto';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { ValidationPipe } from '@nestjs/common';
 (global as any).crypto = crypto;
 
 async function bootstrap() {
@@ -22,6 +23,14 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new TransformInterceptor
   )
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('The Sole Edit')
