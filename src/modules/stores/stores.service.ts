@@ -32,8 +32,6 @@ export class StoresService {
     return store
   }
 
-  //implement pagination and search
-
   async findAll(pagination: PaginationDto) {
     const skip = (pagination.page || 1 - 1) * (pagination.limit || 25)
     const query = this.storeRepository.createQueryBuilder('store');

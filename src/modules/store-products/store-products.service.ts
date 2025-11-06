@@ -17,33 +17,37 @@ export class StoreProductsService {
   ) { }
 
   async create(createStoreProductDto: CreateStoreProductDto) {
-    const existingRelationShip = await this.storeProdsRepository.findOne({
-      where: {
-        store: { id: createStoreProductDto.store_id },
-        product: { id: createStoreProductDto.product_id }
+    try {
+      const existingRelationShip = await this.storeProdsRepository.findOne({
+        where: {
+          store: { id: createStoreProductDto.store_id },
+          product: { id: createStoreProductDto.product_id }
+        }
+      })
+
+
+      if (existingRelationShip) {
+        throw new ConflictException('This product is already associated with the store')
       }
-    })
 
-    console.log(createStoreProductDto)
+      const isAvailable = createStoreProductDto.stock > 0
 
-    if (existingRelationShip) {
-      console.log(existingRelationShip)
-      throw new ConflictException()
+      const storeProduct = this.storeProdsRepository.create({
+        store: { id: createStoreProductDto.store_id },
+        product: { id: createStoreProductDto.product_id },
+        price: createStoreProductDto.price,
+        stock: createStoreProductDto.stock,
+        is_available: isAvailable,
+      })
+
+
+      await this.storeProdsRepository.save(storeProduct)
+      return storeProduct
     }
+    catch (error) {
+      throw new BadRequestException('Failed to create store product')
 
-    const isAvailable = createStoreProductDto.stock > 0
-
-    const storeProduct = this.storeProdsRepository.create({
-      store: { id: createStoreProductDto.store_id },
-      product: { id: createStoreProductDto.product_id },
-      price: createStoreProductDto.price,
-      stock: createStoreProductDto.stock,
-      is_available: isAvailable,
-    })
-
-
-    await this.storeProdsRepository.save(storeProduct)
-    return storeProduct
+    }
   }
 
   async findAll(storeId: number, pagination: PaginationDto) {
@@ -54,20 +58,38 @@ export class StoreProductsService {
     query.innerJoinAndSelect('storeProduct.product', 'product');
     query.where('storeProduct.store.id = :storeId', { storeId });
 
+    console.log('Received inStock:', pagination.inStock, 'type:', typeof pagination.inStock);
+    console.log('All pagination params:', pagination);
+
     if (pagination.category) {
       query.andWhere('LOWER(product.category) LIKE :category', {
         category: `%${pagination.category.toLowerCase()}%`
       });
     }
 
+    if (pagination.search) {
+      const searchTerm = `%${pagination.search.toLowerCase()}%`;
+      query.andWhere('LOWER(product.name) LIKE :search', { search: searchTerm });
+    }
+
+    if (pagination.inStock) {
+      const inStockValue = pagination.inStock === 'true';
+      query.andWhere('storeProduct.is_available = :inStock', {
+        inStock: inStockValue
+      });
+    }
     query.orderBy('storeProduct.createdAt', 'DESC');
     query.skip(skip);
     query.take(limit);
 
+    const sql = query.getSql();
+    console.log('SQL Query:', sql);
+    console.log('SQL Parameters:', query.getParameters());
+
     const [products, total] = await query.getManyAndCount();
 
     return this.paginationService.buildPaginatedResponse(
-      products,
+      this.formatJointProducts(products),
       total,
       page,
       limit,
@@ -104,7 +126,6 @@ export class StoreProductsService {
     return updatedStoreProducts
   }
 
-
   async remove(id: number) {
     const store = await this.storeProdsRepository.findOne({ where: { id } })
 
@@ -113,10 +134,25 @@ export class StoreProductsService {
     }
 
     await this.storeProdsRepository.update(id, {
-      is_available: false
+      is_available: false,
+      stock: 0
+
     })
 
     const deletedStoreProduct = await this.storeProdsRepository.findOne({ where: { id } })
     return deletedStoreProduct
+  }
+
+  formatJointProducts = (results: StoreProduct[]) => {
+    return results.map(item => {
+      const { product, ...storeProductData } = item;
+
+      return {
+        ...product,
+        ...storeProductData,
+        store_product_id: storeProductData.id,
+        product_id: product.id,
+      };
+    });
   }
 }

@@ -5,7 +5,7 @@ import { PaginationDto } from '../services/pagination/dtos/pagination.dto';
 export const Pagination = createParamDecorator(
     (data: unknown, ctx: ExecutionContext): PaginationDto => {
         const request = ctx.switchToHttp().getRequest();
-        const { page = 0, limit = 10, search, category } = request.query;
+        const { page = 0, limit = 10, search, category, inStock } = request.query;
 
         const pagination = new PaginationDto();
         pagination.page = parseInt(page, 10);
@@ -16,6 +16,9 @@ export const Pagination = createParamDecorator(
         }
         if (category) {
             pagination.category = category as string;
+        }
+        if (inStock) {
+            pagination.inStock = inStock as string;
         }
 
         return pagination;

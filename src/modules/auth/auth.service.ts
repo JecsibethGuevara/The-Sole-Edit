@@ -19,6 +19,8 @@ export class AuthService {
   ) { }
 
 
+
+
   async create(SignUpDto: SignUpDto): Promise<{ user: Omit<User, 'password_hash'>; token: string }> {
     const { email, password, name } = SignUpDto;
 
@@ -59,6 +61,10 @@ export class AuthService {
       throw new NotFoundException('This User does not exist')
     }
 
+    if (user.is_active === false) {
+      throw new UnauthorizedException('This user account is deactivated')
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
@@ -75,7 +81,6 @@ export class AuthService {
   async validateUser(payload: JwtPayload): Promise<User | null> {
     return this.userRepository.findOne({ where: { id: payload.userId } });
   }
-
 
   async update(id: number, updateAuthDto: UpdateUserDto, requestingUserId) {
     const { email, name, password } = updateAuthDto
@@ -115,7 +120,6 @@ export class AuthService {
     })
     return updatedUser
   }
-
 
   async remove(id: number) {
     const user = await this.userRepository.findOne({

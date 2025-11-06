@@ -5,11 +5,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import type { AuthenticatedRequest } from './interfaces/authenticatedRequest.interface';
+import { JwtService } from '@nestjs/jwt';
+import { BlacklistService } from './blacklist.service';
 
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    private blacklistService: BlacklistService) { }
 
   @Post('signup')
   async signup(@Body() signupDto: SignUpDto) {
@@ -21,6 +25,23 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto)
   }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req) {
+    const token = req.headers['authorization'].split(' ')[1];
+    if (token) {
+      this.blacklistService.addToBlacklist(token);
+    }
+
+    return {
+      success: true,
+      message: 'Logged out successfully',
+      blacklisted_tokens: this.blacklistService.getBlacklistSize(),
+    };
+  }
+
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async updateUser(

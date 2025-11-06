@@ -13,10 +13,10 @@ export class ProductsService {
   ) { }
 
   async create(createProductDto: CreateProductDto, userId: number) {
+    console.log(userId)
     const producto = this.productRepository.create({
       ...createProductDto,
       store_id: +createProductDto.store_id,
-      is_active: true,
       created_by: userId
     })
     await this.productRepository.save(producto)
@@ -25,13 +25,17 @@ export class ProductsService {
 
   async findOne(id: number) {
     const product = await this.productRepository.findOne({
-      where: { id }
-    })
+      where: { id },
+      relations: ['storeProducts'],
+    });
+
     if (!product) {
-      throw new NotFoundException('No product found')
+      throw new NotFoundException(`Product with ID "${id}" not found`);
     }
+
     return product;
   }
+
 
 
   // remember: implment if time allows

@@ -16,6 +16,7 @@ import { StoreProduct } from "./modules/store-products/entities/store-product.en
 import { StoreProductsModule } from "./modules/store-products/store-products.module";
 import { DataSource } from "typeorm";
 import { ProductSubscriber } from "./common/subscribers/product.subscriber";
+import { BlacklistService } from "./modules/auth/blacklist.service";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,7 +40,7 @@ import { ProductSubscriber } from "./common/subscribers/product.subscriber";
     StoreProductsModule
   ],
   controllers: [AppController],
-  providers: [AppService, JwtAuthGuard, {
+  providers: [AppService, JwtAuthGuard, BlacklistService, {
     provide: 'INIT_SUBSCRIBERS',
     useFactory: (dataSource: DataSource) => {
       new ProductSubscriber(dataSource)

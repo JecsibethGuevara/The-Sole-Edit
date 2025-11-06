@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { BlacklistService } from 'src/modules/auth/blacklist.service';
 ;
 
 
@@ -7,7 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService) { }
+    constructor(private jwtService: JwtService,
+        private blacklistService: BlacklistService,
+    ) { }
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
@@ -22,6 +25,10 @@ export class JwtAuthGuard implements CanActivate {
             throw new UnauthorizedException('Invalid authorization format');
         }
 
+        if (this.blacklistService.isBlacklisted(token)) {
+            throw new UnauthorizedException('Token has been invalidated');
+        }
+
         try {
             const payload = await this.jwtService.verifyAsync(token);
             request.user = payload;
@@ -32,3 +39,4 @@ export class JwtAuthGuard implements CanActivate {
         return true;
     }
 }
+

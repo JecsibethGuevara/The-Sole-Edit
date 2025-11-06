@@ -25,8 +25,8 @@ export class CreateProductDto {
     @IsNotEmpty()
     image_url: string
     //remember: maybe create the relationship later
-    @IsInt()
-    @IsNotEmpty()
-    created_by: number;
+    // @IsInt()
+    // @IsNotEmpty()
+    // created_by: number;
 
 }

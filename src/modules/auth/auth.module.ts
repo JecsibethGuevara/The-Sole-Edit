@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtConfigService } from './strategies/jwt.config';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { BlacklistService } from './blacklist.service';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtConfigService, JwtAuthGuard],
-  exports: [AuthService, JwtModule, JwtAuthGuard]
+  providers: [AuthService, JwtStrategy, JwtConfigService, JwtAuthGuard, BlacklistService],
+  exports: [AuthService, JwtModule, JwtAuthGuard, BlacklistService],
 })
 export class AuthModule { }
