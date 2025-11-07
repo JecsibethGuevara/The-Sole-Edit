@@ -1,41 +1,105 @@
-## 🛍️ Simple-Ecommerce Backend (NestJS + PostgreSQL)
+# Backend
 
-MVP para una plataforma de e-commerce simple, diseñado para demostrar un criterio técnico sólido utilizando NestJS, TypeScript, PostgreSQL, TypeORM, JWT para autenticación, y Docker para la contenerización.
+This is the backend for the Choppi application, a NestJS-based API.
 
-## ✨ MVP Funcionalidad
+## Table of Contents
 
-El objetivo de este MVP es reflejar buen criterio técnico a través de:
+- [Local Setup](#local-setup)
+- [Environment Variables](#environment-variables)
+- [Database](#database)
+- [Running the Application](#running-the-application)
+- [Deployment](#deployment)
 
-- Autenticación Básica (JWT): Registro e inicio de sesión.
+## Local Setup
 
-- Catálogo: Gestión de entidades clave (Stores, Products, StoreProducts).
+This project uses Docker to simplify the local development setup.
 
-- Vistas: Endpoints CRUD (Crear, Leer, Actualizar, Borrar) para operar el catálogo.
+### Prerequisites
 
-## Setup Local y Ejecución con Docker
+- [Docker](https://www.docker.com/get-started)
+- [Node.js](https://nodejs.org/) (for running outside of Docker)
 
-La manera recomendada de levantar el proyecto en tu entorno local es usando Docker Compose, que gestiona el backend (NestJS) y la base de datos (PostgreSQL).
+### Instructions
 
-1. Requisitos Previos
+1.  **Clone the repository:**
 
-- Docker
-- Docker Compose
+    ```bash
+    git clone <repository-url>
+    cd backend
+    ```
 
-2. Variables de Entorno
-   Crea un archivo llamado .env en la raíz del proyecto. Este archivo provee las credenciales para la base de datos local y la configuración de seguridad.
+2.  **Create an environment file:**
 
-## Production Considerations
+    Create a `.env` file in the root of the project and add the environment variables specified in the [Environment Variables](#environment-variables) section.
 
-Este proyecto utiliza una base de datos PostgreSQL local para simplicidad durante el desarrollo.
+3.  **Run with Docker Compose:**
 
-En un entorno de producción, las siguientes prácticas son críticas y reflejan el criterio técnico:
+    ```bash
+    docker-compose up -d
+    ```
 
-- Base de Datos Gestionada: Usar un servicio de PostgreSQL Gestionado (ej. Render PostgreSQL) con backups automáticos y gestión de mantenimiento.
+    This will start the NestJS application and a PostgreSQL database in Docker containers. The application will be available at `http://localhost:3000`.
 
-- Configuración por Entorno: Implementar configuraciones específicas (ej. database.config.production.ts) y variables de entorno seguras.
+## Environment Variables
 
-- Desactivar Sincronización: El flag synchronize de TypeORM debe ser false; el control del esquema debe hacerse exclusivamente a través de Migraciones.
+The following environment variables are required. Create a `.env` file in the root of the project with the following content:
 
-- CI/CD: Configurar pipelines de Integración y Despliegue Continuo (CI/CD) para automatizar el build, el testing y el despliegue a plataformas como Render o DigitalOcean.
+```
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=24h
 
-## Setup Local y Ejecución con Docker
+# Database
+DATABASE_URL=postgresql://postgres:password@postgres:5432/soleditdb
+```
+
+**Note:** The `DATABASE_URL` is configured to work with the Docker Compose setup. If you are running the database separately, you will need to change this.
+
+## Database
+
+### Initialization
+
+The database is automatically initialized when the Docker container starts. The `src/scripts/init.sql` file is executed, which creates the necessary tables.
+
+### Migrations
+
+This project does not currently use a migration tool like TypeORM migrations. Schema changes should be added to the `src/scripts/init.sql` file.
+
+## Running the Application
+
+You can run the application using the following npm scripts (defined in `package.json`):
+
+-   **Development mode:**
+
+    ```bash
+    npm run start:dev
+    ```
+
+-   **Production mode:**
+
+    ```bash
+    npm run build
+    npm run start:prod
+    ```
+
+-   **Tests:**
+
+    ```bash
+    npm run test
+    ```
+
+-   **Linting:**
+
+    ```bash
+    npm run lint
+    ```
+
+## Deployment
+
+The included `Dockerfile` can be used to build a production image of the application. You can build the image with the following command:
+
+```bash
+docker build -t choppi-backend .
+```
+
+You can then run this image in a containerized environment.
