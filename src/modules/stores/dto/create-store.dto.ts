@@ -20,9 +20,6 @@ export class CreateStoreDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;
-    //remember: maybe create the relationship later
-    @IsInt()
-    @IsNotEmpty()
-    created_by: number;
+
 
 }

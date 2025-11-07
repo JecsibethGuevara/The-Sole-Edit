@@ -17,7 +17,8 @@ export class ProductsService {
     const producto = this.productRepository.create({
       ...createProductDto,
       store_id: +createProductDto.store_id,
-      created_by: userId
+      created_by: userId,
+      is_active: true
     })
     await this.productRepository.save(producto)
     return producto

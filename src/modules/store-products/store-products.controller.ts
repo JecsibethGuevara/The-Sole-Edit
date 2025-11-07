@@ -24,14 +24,13 @@ export class StoreProductsController {
     return this.storeProductsService.findAll(storeId, pagination);
   }
 
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStoreProductDto: UpdateStoreProductDto) {
-    return this.storeProductsService.update(+id, updateStoreProductDto);
+  @Patch('/:idStore/products/:idProduct')
+  update(@Param('idStore') idStore: string, @Param('idProduct') idProduct: string, @Body() updateStoreProductDto: UpdateStoreProductDto) {
+    return this.storeProductsService.update(+idStore, +idProduct, updateStoreProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.storeProductsService.remove(+id);
+  @Delete('/:idStore/products/:idProduct')
+  remove(@Param('idStore') idStore: string, @Param('idProduct') idProduct: string,) {
+    return this.storeProductsService.remove(+idStore, +idProduct);
   }
 }

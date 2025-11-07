@@ -82,9 +82,6 @@ export class StoreProductsService {
     query.skip(skip);
     query.take(limit);
 
-    const sql = query.getSql();
-    console.log('SQL Query:', sql);
-    console.log('SQL Parameters:', query.getParameters());
 
     const [products, total] = await query.getManyAndCount();
 
@@ -97,19 +94,23 @@ export class StoreProductsService {
     )
   }
 
-  async update(id: number, updateStoreProductDto: UpdateStoreProductDto) {
+  async update(idStore: number, idProduct: number, updateStoreProductDto: UpdateStoreProductDto) {
     const storeProduct = await this.storeProdsRepository.findOne({
       where: {
-        id
+        store: { id: idStore },
+        product: { id: idProduct }
       }
+
     })
+    const id = storeProduct?.id
+
 
     if (!storeProduct) {
-      throw new NotFoundException()
+      throw new NotFoundException('No such product')
     }
 
     if (updateStoreProductDto.store_id || updateStoreProductDto.product_id) {
-      throw new BadRequestException
+      throw new BadRequestException('Do not modify the relation ship')
     }
 
     const updatePayload = { ...updateStoreProductDto }
@@ -118,7 +119,7 @@ export class StoreProductsService {
       updatePayload.is_available = updateStoreProductDto.stock > 0;
     }
 
-    await this.storeProdsRepository.update(id, {
+    await this.storeProdsRepository.update(storeProduct.id, {
       ...updatePayload
     })
 
@@ -126,14 +127,21 @@ export class StoreProductsService {
     return updatedStoreProducts
   }
 
-  async remove(id: number) {
-    const store = await this.storeProdsRepository.findOne({ where: { id } })
+  async remove(idStore: number, idProduct: number,) {
+    const store = await this.storeProdsRepository.findOne({
+      where: {
+        store: { id: idStore },
+        product: { id: idProduct }
+      }
+    })
+
+    const id = store?.id
 
     if (!store) {
       throw new NotFoundException()
     }
 
-    await this.storeProdsRepository.update(id, {
+    await this.storeProdsRepository.update(store?.id, {
       is_available: false,
       stock: 0
 

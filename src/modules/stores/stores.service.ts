@@ -24,7 +24,7 @@ export class StoresService {
 
     const store = this.storeRepository.create({
       ...createStoreDto,
-      created_by: userId,
+      created_by: userId || 0,
       is_active: true
     })
 
